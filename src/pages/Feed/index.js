@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, FlatList,Button , View, ScrollView, TextInput} from 'react-native';
+import { StyleSheet, FlatList, Button , View, ScrollView, TextInput, Text, Alert, TouchableOpacity} from 'react-native';
 import axios from 'axios'
 import LazyImage from '../../components/LazyImage';
 import { AsyncStorage } from 'react-native';
+import { Icon, Divider } from 'react-native-elements';
 
 
-import { Container, Post, Header, Avatar, Name, Description, Loading } from './styles';
+import { Container, Post, Header, Avatar, Name, Description, Loading, Curtida, Comentario } from './styles';
 
 export default function Feed() {
   const [error, setError] = useState('');
@@ -71,7 +72,7 @@ export default function Feed() {
   const onSave = async (id) => {
     try {
       await AsyncStorage.setItem(id, text);
-      setComentarios([...comentarios, ...text])
+      setComentarios([...comentarios, ...text + "\n"])
     } catch (error) {
       // Error saving data
     }
@@ -83,7 +84,23 @@ export default function Feed() {
     loadPage()
   }, []);
 
- 
+  function mostrarCurtir(likeIcon) {
+    if (likeIcon % 2 === 0) {
+      return 'red';
+    } else {
+      return 'black';
+    }
+  }
+
+  function mostrarCurtir2(likeIcon) {
+    if (likeIcon % 2 === 0) {
+      return 'heart';
+    } else {
+      return 'heart-o';
+    }
+  }
+
+  const [likeIcon, setLikeIcon] = React.useState(1);
 
   const renderItem = ({item}) => {
     return (
@@ -100,9 +117,51 @@ export default function Feed() {
               source={{ uri: item.image }}
             />
 
+            <Curtida>
+              <TouchableOpacity onPress={() => setLikeIcon(likeIcon + 1)}>
+                <Icon
+                  style = {styles.like}             
+                  name={mostrarCurtir2(likeIcon)}
+                  type='font-awesome'
+                  color={mostrarCurtir(likeIcon)}
+                  />
+              </TouchableOpacity>
+
+              <Icon
+                style = {styles.comment}           
+                name='commenting-o'
+                type='font-awesome'
+                color='black'
+                onPress={() => navigation.navigate('ComentariosIndex')}/> 
+	
+	            <Icon
+                style = {styles.send}             
+                name='paper-plane-o'
+                type='font-awesome'
+                color='black' />
+
+              <View>
+                <Text style = {styles.listalike}> 
+                  
+                </Text>
+              </View>
+            
+            </Curtida>
+
             <Description>
-              <Name>{item.author.name}</Name> {item.description}
+              <Name style = {styles.name}>{item.author.name}</Name> {item.description}   
             </Description>
+
+            <Divider style={{ backgroundColor: 'black' }} />
+
+            <Comentario style = {styles.teste}>
+              <Name style = {styles.name}>{"Sérgio"}</Name> {"N entendi nada \n"}
+            
+              <Name style = {styles.name}>{"Marcos André"}</Name> {"Esse ai foi longe mesmo"}
+            
+            </Comentario>
+
+            
             <Description>
               {comentarios}
             </Description>
@@ -162,4 +221,27 @@ const styles = StyleSheet.create(
     minHeight: 170,
     borderTopWidth: 1,
     borderColor: "rgba(212,211,211, 0.3)"
-}})
+},
+like: {
+  padding: 2,
+  margin: 1,
+  width: 30,
+  height: 30
+},
+
+comment: {
+  padding: 2,
+  margin: 1,
+  width: 30,
+  height: 30 
+},
+
+send: {
+  padding: 2,
+  margin: 1,
+  width: 30,
+  height: 30
+  
+}
+
+})
